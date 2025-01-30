@@ -14,18 +14,16 @@ export const getPrecheckin = async (req, res) => {
     const { id_reserva } = req.params;
     const precheckins = await Precheckin.findAll({
       where: {
-        id_reserva, 
+        id_reserva,
       },
     });
 
-    if (!precheckins || precheckins.length === 0)
-      return res.status(404).json({ message: "Precheckin not found" });
     res.json(precheckins); // Devuelve un array de objetos
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
-  
+
 export const createPrecheckin = async (req, res) => {
   const {
     tipoDocumento,
@@ -61,6 +59,7 @@ export const createPrecheckin = async (req, res) => {
     id_externo,
     id_siat,
     estado,
+    tempId,
   } = req.body;
 
   console.log("Datos recibidos en el backend:", req.body);
@@ -102,8 +101,16 @@ export const createPrecheckin = async (req, res) => {
       estado,
     });
 
-    // Responde con el registro creado o actualizado
-    res.json(newPrecheckin);
+    // Crear una copia del nuevo objeto `newPrecheckin` con el atributo `tempId`
+    const responseNewCheckin = {
+      ...newPrecheckin.get({ plain: true }), // Convierte el modelo a objeto plano
+      tempId, // Añadir `tempId` a la copia del objeto
+    };
+
+    console.log("Response con tempId:", responseNewCheckin);
+
+    // Responder con la copia del objeto, ahora con `tempId`
+    res.json(responseNewCheckin);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -113,7 +120,6 @@ export const updatePrecheckin = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      
       tipoDocumento,
       documento,
       primerNombre,
